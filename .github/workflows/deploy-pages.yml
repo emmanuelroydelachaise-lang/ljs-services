@@ -20,15 +20,102 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
+      - name: Checkout LJS Services
         uses: actions/checkout@v6
+        with:
+          path: overlay
+
+      - name: Checkout CVC Tertiaire application
+        uses: actions/checkout@v6
+        with:
+          repository: emmanuelroydelachaise-lang/ljs-feuilles-heure
+          ref: main
+          path: source
+
+      - name: Build LJS Services
+        shell: bash
+        run: |
+          rm -rf site
+          mkdir -p site
+          cp -a source/. site/
+          rm -rf site/.git site/.github
+          cp overlay/config.js site/config.js
+          cp overlay/services-supabase-router.js site/services-supabase-router.js
+
+          python - <<'PY'
+          from pathlib import Path
+          import json
+
+          index = Path('site/index.html')
+          text = index.read_text(encoding='utf-8')
+          text = text.replace("<title>LJS Energies — Feuilles d'heures</title>", "<title>LJS Services</title>")
+          text = text.replace('<div class="subtitle">CVC TERTIAIRE</div>', '<div class="subtitle">LJS SERVICES</div>')
+          marker = '<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>'
+          if 'services-supabase-router.js' not in text:
+              text = text.replace(marker, marker + '\n  <script src="./services-supabase-router.js?v=20260920-services-1"></script>')
+          index.write_text(text, encoding='utf-8')
+
+          manifest_path = Path('site/manifest.webmanifest')
+          manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+          manifest['id'] = '/ljs-services/'
+          manifest['name'] = 'LJS Services'
+          manifest['short_name'] = 'LJS Services'
+          manifest['description'] = 'LJS Services - application LJS Energies'
+          manifest['start_url'] = '/ljs-services/?source=pwa'
+          manifest['scope'] = '/ljs-services/'
+          manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+
+          pwa = Path('site/pwa-clean.js')
+          p = pwa.read_text(encoding='utf-8')
+          p = p.replace("const VERSION = '20260916-pwa-22';", "const VERSION = '20260920-services-1';")
+          p = p.replace("const CLEAN_KEY = 'ljs_pwa_clean_version';", "const CLEAN_KEY = 'ljs_services_pwa_clean_version';")
+          p = p.replace(
+              "await Promise.all(registrations.map(registration => registration.unregister()));",
+              "await Promise.all(registrations.filter(registration => registration.scope.includes('/ljs-services/')).map(registration => registration.unregister()));"
+          )
+          p = p.replace(
+              "await Promise.all(names.filter(name => name.startsWith('ljs-')).map(name => caches.delete(name)));",
+              "await Promise.all(names.filter(name => name.startsWith('ljs-services-')).map(name => caches.delete(name)));"
+          )
+          pwa.write_text(p, encoding='utf-8')
+
+          sw = Path('site/sw.js')
+          s = sw.read_text(encoding='utf-8')
+          s = s.replace("const CACHE = 'ljs-heures-v65';", "const CACHE = 'ljs-services-v1';")
+          s = s.replace(
+              "keys.filter(key => key !== CACHE).map(key => caches.delete(key))",
+              "keys.filter(key => key.startsWith('ljs-services-') && key !== CACHE).map(key => caches.delete(key))"
+          )
+          if "'./services-supabase-router.js'" not in s:
+              s = s.replace("'./config.js',", "'./config.js', './services-supabase-router.js',")
+          sw.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Generate PWA PNG icons
+        run: |
+          python -m pip install --quiet cairosvg
+          python - <<'PY'
+          import cairosvg
+          cairosvg.svg2png(url='site/app-icon.svg', write_to='site/icon-192-v3.png', output_width=192, output_height=192)
+          cairosvg.svg2png(url='site/app-icon.svg', write_to='site/icon-512-v3.png', output_width=512, output_height=512)
+          cairosvg.svg2png(url='site/app-icon-maskable.svg', write_to='site/icon-maskable-512-v3.png', output_width=512, output_height=512)
+          PY
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
+
       - name: Upload site
         uses: actions/upload-pages-artifact@v4
         with:
-          path: '.'
+          path: site
+
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
