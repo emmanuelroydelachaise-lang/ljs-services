@@ -1,0 +1,11 @@
+{
+  "id": "/ljs-services/",
+  "name": "LJS Services",
+  "short_name": "LJS Services",
+  "description": "Application LJS Services",
+  "start_url": "/ljs-services/",
+  "scope": "/ljs-services/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0668a9"
+}
