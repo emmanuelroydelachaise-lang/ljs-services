@@ -103,6 +103,7 @@ jobs:
           python -m pip install --quiet cairosvg
           python - <<'PY'
           import cairosvg
+          cairosvg.svg2png(url='site/app-icon.svg', write_to='site/apple-touch-icon.png', output_width=180, output_height=180)
           cairosvg.svg2png(url='site/app-icon.svg', write_to='site/icon-192-v3.png', output_width=192, output_height=192)
           cairosvg.svg2png(url='site/app-icon.svg', write_to='site/icon-512-v3.png', output_width=512, output_height=512)
           cairosvg.svg2png(url='site/app-icon-maskable.svg', write_to='site/icon-maskable-512-v3.png', output_width=512, output_height=512)
