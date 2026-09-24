@@ -1,0 +1,61 @@
+.delete-tech {
+  color:#b42318 !important;
+  border-color:#e7b2ab !important;
+  background:#fff4f2 !important;
+}
+.delete-tech:hover { background:#ffe7e2 !important; }
+.archive-title-row {
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+}
+.archive-title-row h2 { margin-bottom:4px; }
+.archive-title-row .hint { margin:0; max-width:680px; }
+.archive-tech-list { display:grid; gap:10px; margin-top:14px; }
+.archive-tech-group {
+  border:1px solid var(--line);
+  border-radius:12px;
+  overflow:hidden;
+  background:#fff;
+}
+.archive-tech-toggle {
+  width:100%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  border:0;
+  border-radius:0;
+  background:#f7fafc;
+  color:var(--text);
+  text-align:left;
+}
+.archive-tech-toggle:hover { background:#eef5f8; }
+.archive-tech-toggle > span:first-child { display:flex; align-items:center; gap:8px; min-width:0; }
+.archive-deleted-badge {
+  display:inline-block;
+  padding:2px 7px;
+  border-radius:999px;
+  font-size:.72rem;
+  font-weight:800;
+  color:#b42318;
+  background:#fff0ed;
+  border:1px solid #f0c4bc;
+}
+.archive-sheet-list { display:grid; }
+.archive-sheet-row {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  padding:11px 12px;
+  border-top:1px solid var(--line);
+}
+.archive-sheet-info { display:flex; flex-direction:column; gap:3px; }
+@media (max-width:640px) {
+  .archive-title-row,
+  .archive-sheet-row { flex-direction:column; align-items:stretch; }
+  .archive-tech-toggle { align-items:flex-start; }
+  .archive-sheet-row .admin-row-actions { width:100%; }
+}
