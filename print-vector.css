@@ -1,0 +1,25 @@
+.header-logo{width:52px!important;height:52px!important;max-height:52px!important;object-fit:contain!important;}
+.login-brand img{width:112px!important;max-height:132px!important;object-fit:contain!important;}
+.reset-sheet{border-color:#d92d20!important;color:#b42318!important;background:#fff4f2!important;}
+.reset-sheet:hover{background:#ffe7e2!important;}
+
+@media print {
+  .exact-print-sheet {
+    background:#fff!important;
+    print-color-adjust:exact!important;
+    -webkit-print-color-adjust:exact!important;
+  }
+  .exact-print-bg{
+    display:block!important;
+    position:absolute!important;
+    z-index:0!important;
+    inset:0!important;
+    width:100%!important;
+    height:100%!important;
+    object-fit:fill!important;
+  }
+  .exact-print-sheet::after{
+    display:none!important;
+    content:none!important;
+  }
+}
