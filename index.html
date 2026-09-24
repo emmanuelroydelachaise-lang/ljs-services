@@ -1,12 +1,24 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0668a9">
-  <title>LJS Services</title>
-  <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="stylesheet" href="./styles.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0668a9" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <title>LJS Energies — Services</title>
+  <link rel="manifest" href="./manifest.webmanifest?v=20260915-pwa-8" />
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192-v2.png?v=20260915-pwa-8" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png?v=20260923-ios-icon-1" />
+  <link rel="stylesheet" href="styles.css?v=20260915-pwa-8" />
+  <link rel="stylesheet" href="print-vector.css?v=20260915-pwa-8" />
+  <link rel="stylesheet" href="technician-archives.css?v=20260916-tech-archives-1" />
+  <link rel="stylesheet" href="leave-requests.css?v=20260918-leave-red-1" />
+  <link rel="stylesheet" href="admin-leave-requests.css?v=20260918-leave-red-1" />
+  <style id="tech-weekdays-only">
+    /* Technicien : lundi à vendredi uniquement. #adminDays reste inchangé pour le responsable. */
+    #days > .day-card:nth-child(n+6) { display: none !important; }
+  </style>
 </head>
 <body>
   <header class="app-header">
@@ -26,18 +38,130 @@
       </svg>
       <div>
         <div class="brand">LJS ENERGIES</div>
-        <div class="subtitle">LJS Services</div>
+        <div class="subtitle">LJS SERVICES</div>
       </div>
     </div>
+    <button id="installBtn" class="ghost">Installer l’application</button>
   </header>
-  <main class="container">
-    <section class="card">
-      <h1>LJS Services</h1>
-      <p>Application prête à recevoir les fonctions du service.</p>
+
+  <main id="app" class="container"></main>
+  <div id="printArea" class="print-area"></div>
+
+  <template id="loginTemplate">
+    <section class="card login-card">
+      <div class="login-brand">
+        <svg class="login-logo" viewBox="0 0 320 260" role="img" aria-label="LJS Energies" style="width:min(300px,85%);height:90px;display:block">
+          <defs>
+            <linearGradient id="metal-l" x1="0" y1="0" x2="0.9" y2="1"><stop offset="0" stop-color="#d9d9d9"/><stop offset="0.35" stop-color="#8c8c8c"/><stop offset="0.72" stop-color="#505050"/><stop offset="1" stop-color="#242424"/></linearGradient>
+            <linearGradient id="green-l" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#147d19"/><stop offset="0.55" stop-color="#53a600"/><stop offset="1" stop-color="#b6d800"/></linearGradient>
+            <linearGradient id="orange-l" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#e74a00"/><stop offset="0.55" stop-color="#ff7900"/><stop offset="1" stop-color="#ffc400"/></linearGradient>
+            <linearGradient id="blue-l" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#61d5ff"/><stop offset="1" stop-color="#008ccc"/></linearGradient>
+          </defs>
+          <path d="M250 52 A112 112 0 1 0 254 205" fill="none" stroke="url(#metal-l)" stroke-width="34" stroke-linecap="round"/>
+          <path d="M88 129 C118 157 151 153 184 124 C218 94 250 91 278 108 C247 105 224 115 197 139 C160 171 120 172 88 148 Z" fill="url(#green-l)"/>
+          <path d="M108 162 C137 184 169 184 202 155 C231 130 260 127 291 145 C263 142 240 151 215 173 C177 205 139 202 108 181 Z" fill="url(#orange-l)"/>
+          <path d="M104 76 C104 76 132 106 132 125 C132 143 119 156 103 156 C86 156 74 143 74 126 C74 106 104 76 104 76 Z" class="admin-secret-drop" fill="url(#blue-l)"/>
+          <path d="M89 119 C87 131 92 140 102 144" fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round" opacity="0.9"/>
+        </svg>
+        <div class="ljs-color-bar"></div>
+      </div>
+      <h1>Sélection du technicien</h1>
+      <label>Technicien</label>
+      <select id="techSelect"></select>
+      <label>Code PIN</label>
+      <input id="pinInput" type="password" inputmode="numeric" maxlength="4" pattern="[0-9]*" placeholder="4 chiffres" />
+      <button id="loginBtn" class="primary">Ouvrir ma feuille</button>
+      <button id="adminLoginOpen" class="link-btn">Accès responsable</button>
+      <p id="loginError" class="error"></p>
+      <p class="hint demo-hint hidden">Mode démo local : PIN techniciens = <b>1234</b>, responsable = <b>3002</b>.</p>
     </section>
-  </main>
-  <script>
-    if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
-  </script>
+  </template>
+
+  <template id="weekTemplate">
+    <section class="toolbar card">
+      <div><div class="small muted">Technicien</div><strong id="who"></strong></div>
+      <button id="logoutBtn" class="ghost">Quitter</button>
+    </section>
+    <section class="card week-head">
+      <div class="field-row">
+        <div><label>Semaine</label><input id="weekInput" type="week" /></div>
+        <div><label>Véhicule</label><select id="vehicleSelect"></select></div>
+      </div>
+      <div class="status-row"><span id="statusBadge" class="badge"></span><strong id="weekTotal">0,00 h</strong></div>
+    </section>
+    <div id="days"></div>
+    <section class="card"><label>Commentaire général de la semaine</label><textarea id="weekComment" rows="3" placeholder="Commentaire général"></textarea></section>
+    <section class="card signature-card">
+      <div class="signature-head"><div><h2>Signature du technicien</h2><p class="hint">La signature est obligatoire pour valider la semaine.</p></div><button id="clearTechSignature" class="secondary">Effacer</button></div>
+      <canvas id="techSignatureCanvas" class="signature-pad" width="900" height="220"></canvas>
+      <img id="techSignatureImage" class="signature-preview hidden" alt="Signature du technicien" />
+    </section>
+    <section class="card actions three-actions">
+      <button id="saveBtn" class="secondary">Enregistrer</button>
+      <button id="printTechBtn" class="secondary">Aperçu / Imprimer</button>
+      <button id="submitBtn" class="primary">Signer et valider la semaine</button>
+      <p id="saveMsg" class="hint"></p>
+    </section>
+  </template>
+
+  <template id="adminTemplate">
+    <section class="toolbar card"><div><div class="small muted">Mode</div><strong>Responsable</strong></div><button id="adminLogoutBtn" class="ghost">Quitter</button></section>
+    <section id="adminListCard" class="card">
+      <h2>Feuilles des techniciens</h2>
+      <div class="field-row"><div><label>Semaine</label><input id="adminWeekInput" type="week" /></div><button id="refreshAdmin" class="secondary align-end">Actualiser</button></div>
+      <div id="adminTimesheets" class="stack"></div>
+    </section>
+    <section id="adminEditor" class="hidden"></section>
+    <section class="card">
+      <h2>Techniciens</h2>
+      <p class="hint">Ajoute, modifie ou retire un technicien. Pour un intérimaire, indique également son agence d’intérim.</p>
+      <div class="technician-add">
+        <input id="newTechName" placeholder="Nom et prénom" />
+        <select id="newTechType"><option value="employee">Salarié</option><option value="interim">Intérim</option></select>
+        <input id="newTechPin" type="password" inputmode="numeric" maxlength="4" pattern="[0-9]*" placeholder="PIN 4 chiffres" />
+        <button id="addTechBtn" class="primary">Ajouter</button>
+      </div>
+      <div id="adminTechnicians" class="stack"></div>
+    </section>
+    <section class="card">
+      <h2>Chantiers</h2>
+      <div class="project-add"><input id="newProjectCode" placeholder="N° affaire" /><input id="newProjectName" placeholder="Nom du chantier" /><button id="addProjectBtn" class="primary">Ajouter</button></div>
+      <div id="adminProjects" class="stack"></div>
+    </section>
+  </template>
+
+  <template id="adminLoginTemplate">
+    <section class="card login-card">
+      <h1>Accès responsable</h1>
+      <label>Code PIN responsable</label>
+      <input id="adminPinInput" type="password" inputmode="numeric" maxlength="4" pattern="[0-9]*" placeholder="4 chiffres" />
+      <button id="adminLoginBtn" class="primary">Connexion</button>
+      <button id="backToTech" class="link-btn">Retour techniciens</button>
+      <p id="adminLoginError" class="error"></p>
+    </section>
+  </template>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./services-supabase-router.js?v=20260924-full-sync-1"></script>
+  <script src="config.js?v=20260915-pwa-8"></script>
+  <script src="app-1.js?v=20260915-pwa-8"></script>
+  <script src="app-2.js?v=20260918-admin-enter-1"></script>
+  <script src="hidden-admin-access.js?v=20260920-hidden-admin-1"></script>
+  <script src="app-3.js?v=20260924-full-sync-1"></script>
+  <script src="app-4.js?v=20260915-pwa-8"></script>
+  <script src="app-5.js?v=20260915-pwa-8"></script>
+  <script src="app-6.js?v=20260916-print-hours-3"></script>
+  <script src="responsible-change-history.js?v=20260916-history-1"></script>
+  <script src="responsible-correction-display-fix.js?v=20260916-history-fix-2"></script>
+  <script src="leave-requests.js?v=20260918-leave-red-1"></script>
+  <script src="admin-leave-requests.js?v=20260918-leave-red-1"></script>
+  <script src="admin-reset.js?v=20260915-pwa-8"></script>
+  <script src="ui-labels.js?v=20260916-zone-loop-hotfix-1"></script>
+  <script src="admin-projects.js?v=20260915-pwa-8"></script>
+  <script src="interim-agency.js?v=20260915-pwa-8"></script>
+  <script src="print-logo-fix.js?v=20260915-pwa-8"></script>
+  <script src="pdf-export.js?v=20260924-full-sync-1"></script>
+  <script src="archive-pdf-buttons.js?v=20260924-full-sync-1"></script>
+  <script src="pwa-clean.js?v=20260924-full-sync-1"></script>
 </body>
 </html>
