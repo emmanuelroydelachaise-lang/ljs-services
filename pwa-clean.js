@@ -1,5 +1,5 @@
 (() => {
-  const VERSION = '20260924-approved-edit-direct-1';
+  const VERSION = '20260924-responsible-only-edit-1';
   const CLEAN_KEY = 'ljs_services_pwa_clean_version';
   let deferredPrompt = null;
 
