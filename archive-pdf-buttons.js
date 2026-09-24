@@ -241,6 +241,14 @@
         if (!actions) return;
         actions.innerHTML = '';
 
+        const editButton = document.createElement('button');
+        editButton.type = 'button';
+        editButton.className = 'primary archive-edit-only';
+        editButton.textContent = 'MODIFIER LA FEUILLE';
+        editButton.title = 'Modifier cette feuille validée en mode Responsable';
+        editButton.onclick = () => openAdminSheet(sheet.id, name);
+        actions.appendChild(editButton);
+
         const pdfButton = document.createElement('button');
         pdfButton.type = 'button';
         pdfButton.className = 'secondary archive-pdf-only';
