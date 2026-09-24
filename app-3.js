@@ -30,7 +30,7 @@ function installTechnicianArchives() {
     <div class="tech-archives-head">
       <div>
         <h2>Mes archives</h2>
-        <p class="hint">Feuilles validées par le responsable. Tu peux les consulter ou les réouvrir pour modification. Une réouverture annule la validation responsable et impose une nouvelle signature.</p>
+        <p class="hint">Feuilles validées par le responsable. Elles sont disponibles en consultation uniquement.</p>
       </div>
     </div>
     <div id="technicianArchivesList" class="stack"></div>`;
@@ -98,42 +98,6 @@ async function getTechnicianApprovedSheets() {
   return data || [];
 }
 
-async function reopenTechnicianArchivedSheet(sheet) {
-  if (!sheet?.id || !sheet?.week_start) return;
-  if (!confirm('Réouvrir cette feuille pour modification ?\n\nLa validation du responsable sera annulée et tu devras signer puis renvoyer la feuille pour une nouvelle validation.')) return;
-
-  try {
-    if (!isCloud) {
-      const db = demoDb();
-      const target = (db.sheets || []).find(x => x.id === sheet.id && x.technician_id === currentProfile.id && x.status === 'approved');
-      if (!target) throw new Error('Cette feuille ne peut pas être réouverte.');
-      target.status = 'draft';
-      target.submitted_at = null;
-      target.approved_at = null;
-      target.technician_signature = '';
-      target.responsible_signature = '';
-      target.responsible_name = '';
-      target.admin_changes = [];
-      target.technician_original = null;
-      saveDemoDb(db);
-    } else {
-      const { data, error } = await sb.rpc('ljs_reopen_approved_timesheet', { p_timesheet_id: sheet.id });
-      if (error) throw error;
-      if (data !== true) throw new Error('Cette feuille ne peut pas être réouverte.');
-    }
-
-    await loadSheet(sheet.week_start);
-    const weekInput = document.getElementById('weekInput');
-    if (weekInput) weekInput.value = weekValueFromMonday(sheet.week_start);
-    showTechnicianSheetView();
-    renderWeek();
-    window.scrollTo({ top:0, behavior:'smooth' });
-    alert('Feuille réouverte. Modifie-la, signe-la puis valide-la de nouveau.');
-  } catch (error) {
-    alert('Impossible de réouvrir cette feuille : ' + (error.message || error));
-  }
-}
-
 async function renderTechnicianArchives() {
   const box = document.getElementById('technicianArchivesList');
   const tab = document.getElementById('techArchivesTab');
@@ -159,9 +123,7 @@ async function renderTechnicianArchives() {
           <strong>Semaine ${weekNumber(sheet.week_start)} — ${archiveWeekPeriod(sheet.week_start)}</strong>
           <div class="meta">Validée par le responsable${approved ? ` le ${approved}` : ''}</div>
         </div>
-        <div class="tech-archive-actions"><button class="secondary tech-open-archive" type="button">Ouvrir</button><button class="primary tech-edit-archive" type="button">Modifier</button></div>`;
-
-      row.querySelector('.tech-edit-archive').onclick = () => reopenTechnicianArchivedSheet(sheet);
+        <button class="secondary tech-open-archive" type="button">Ouvrir</button>`;
 
       row.querySelector('.tech-open-archive').onclick = async event => {
         const btn = event.currentTarget;
@@ -207,15 +169,11 @@ function renderWeek() {
   const badge = document.getElementById('statusBadge');
   badge.textContent = s.status === 'submitted' ? 'Validée technicien / en attente responsable' : s.status === 'approved' ? 'Validée par le responsable' : 'En cours';
   badge.className = 'badge ' + (locked ? 'submitted' : 'draft');
-  const saveBtn = document.getElementById('saveBtn');
-  const approved = s.status === 'approved';
-  saveBtn.disabled = locked && !approved;
-  saveBtn.textContent = approved ? 'MODIFIER LA FEUILLE' : 'Enregistrer';
+  document.getElementById('saveBtn').disabled = locked;
   document.getElementById('submitBtn').disabled = locked;
-  document.getElementById('submitBtn').textContent = locked ? (approved?'Feuille validée':'Semaine déjà validée') : 'Signer et valider la semaine';
-  saveBtn.onclick = approved
-    ? () => reopenTechnicianArchivedSheet({ id:s.id, week_start:s.week_start })
-    : () => saveWeek(false);
+  document.getElementById('submitBtn').textContent = locked ? (s.status==='approved'?'Feuille validée':'Semaine déjà validée') : 'Signer et valider la semaine';
+  document.getElementById('saveBtn').textContent = 'Enregistrer';
+  document.getElementById('saveBtn').onclick = () => saveWeek(false);
   document.getElementById('submitBtn').onclick = () => saveWeek(true);
   document.getElementById('printTechBtn').onclick = () => printTimesheet({...s, days:(s.days||[]).slice(0,5)}, currentProfile.full_name);
   vehicle.onchange = () => { s.vehicle_id = vehicle.value; };
