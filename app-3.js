@@ -207,10 +207,15 @@ function renderWeek() {
   const badge = document.getElementById('statusBadge');
   badge.textContent = s.status === 'submitted' ? 'Validée technicien / en attente responsable' : s.status === 'approved' ? 'Validée par le responsable' : 'En cours';
   badge.className = 'badge ' + (locked ? 'submitted' : 'draft');
-  document.getElementById('saveBtn').disabled = locked;
+  const saveBtn = document.getElementById('saveBtn');
+  const approved = s.status === 'approved';
+  saveBtn.disabled = locked && !approved;
+  saveBtn.textContent = approved ? 'MODIFIER LA FEUILLE' : 'Enregistrer';
   document.getElementById('submitBtn').disabled = locked;
-  document.getElementById('submitBtn').textContent = locked ? (s.status==='approved'?'Feuille validée':'Semaine déjà validée') : 'Signer et valider la semaine';
-  document.getElementById('saveBtn').onclick = () => saveWeek(false);
+  document.getElementById('submitBtn').textContent = locked ? (approved?'Feuille validée':'Semaine déjà validée') : 'Signer et valider la semaine';
+  saveBtn.onclick = approved
+    ? () => reopenTechnicianArchivedSheet({ id:s.id, week_start:s.week_start })
+    : () => saveWeek(false);
   document.getElementById('submitBtn').onclick = () => saveWeek(true);
   document.getElementById('printTechBtn').onclick = () => printTimesheet({...s, days:(s.days||[]).slice(0,5)}, currentProfile.full_name);
   vehicle.onchange = () => { s.vehicle_id = vehicle.value; };
