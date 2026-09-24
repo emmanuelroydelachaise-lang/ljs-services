@@ -1,0 +1,48 @@
+@page {
+  size: A4 landscape;
+  margin: 4mm;
+}
+
+@media print {
+  html, body {
+    width: auto !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+
+  .print-area {
+    display: flex !important;
+    width: 289mm !important;
+    height: 202mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+  }
+
+  .exact-print-sheet {
+    position: relative !important;
+    width: 285.12mm !important;
+    height: 201.6mm !important;
+    margin: 0 auto !important;
+    flex: 0 0 auto !important;
+    overflow: hidden !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid-page !important;
+    background-size: 100% 100% !important;
+  }
+
+  .exact-print-bg {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .exact-print-sheet::after {
+    display: none !important;
+    content: none !important;
+  }
+}
