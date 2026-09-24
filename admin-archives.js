@@ -223,7 +223,7 @@
               <span class="meta">à partir du ${formatArchiveDate(s.week_start)} · ${fmtHours(total)} · ${archiveStatusLabel(s.status)}</span>
             </div>
             <div class="admin-row-actions">
-              <button class="secondary archive-open">Ouvrir / modifier</button>
+              <button class="primary archive-open">MODIFIER LA FEUILLE</button>
               <button class="secondary archive-print">Imprimer</button>
               <button class="secondary archive-delete" style="border-color:#d92d20;color:#b42318;background:#fff4f2">Supprimer</button>
             </div>`;
