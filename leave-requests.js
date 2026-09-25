@@ -62,6 +62,11 @@
         <label class="leave-choice"><input type="radio" name="leaveType" value="absence"> ABSENCE</label>
       </div>
 
+      <div class="leave-comment-field">
+        <label for="leaveEmployeeComment">COMMENTAIRE <span class="muted">(facultatif)</span></label>
+        <textarea id="leaveEmployeeComment" rows="3" maxlength="800" placeholder="Précision concernant votre demande…"></textarea>
+      </div>
+
       <div class="leave-form-grid leave-dates">
         <div><label>DU</label><input id="leaveDateFrom" type="date"></div>
         <div><label>AU <span class="muted">(inclus)</span></label><input id="leaveDateTo" type="date"></div>
@@ -124,6 +129,7 @@
     const request_type = document.querySelector('input[name="leaveType"]:checked')?.value || 'conge';
     const date_from = document.getElementById('leaveDateFrom')?.value || '';
     const date_to = document.getElementById('leaveDateTo')?.value || '';
+    const employee_comment = String(document.getElementById('leaveEmployeeComment')?.value || '').trim();
 
     msg.textContent = '';
     if (!last_name) return alert('Renseigne le nom.');
@@ -146,6 +152,7 @@
         date_from,
         date_to,
         request_date: todayIso(),
+        employee_comment: employee_comment || null,
         employee_signature: leaveSignature,
         status: 'pending'
       });
@@ -154,6 +161,7 @@
       msg.textContent = 'Demande envoyée au responsable.';
       document.getElementById('leaveDateFrom').value = '';
       document.getElementById('leaveDateTo').value = '';
+      document.getElementById('leaveEmployeeComment').value = '';
       document.querySelector('input[name="leaveType"][value="conge"]').checked = true;
       clearSignatureCanvas(document.getElementById('leaveSignatureCanvas'));
       leaveSignature = '';
@@ -257,7 +265,7 @@
 })();
 
 (() => {
-  const VERSION = '20260918-leave-pdf-red-2';
+  const VERSION = '20260925-leave-comment-1';
   function loadButtons() {
     if (document.querySelector('script[data-leave-pdf-buttons]')) return;
     const buttons = document.createElement('script');
