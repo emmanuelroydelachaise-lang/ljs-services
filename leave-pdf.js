@@ -97,6 +97,10 @@
           <div class="leave-pdf-motif-title">MOTIF DE L’ABSENCE :</div>
           <div class="leave-pdf-choice">${checkbox(request.request_type === 'conge')} <span>CONGÉ</span></div>
           <div class="leave-pdf-choice">${checkbox(request.request_type === 'absence')} <span>ABSENCE</span></div>
+          <div class="leave-pdf-comment">
+            <strong>COMMENTAIRE :</strong>
+            <div>${esc(request.employee_comment || '')}</div>
+          </div>
         </div>
       </div>
 
@@ -148,6 +152,9 @@
       .leave-pdf-choice{display:flex;align-items:center;gap:3mm;margin:4mm 0;font-weight:700}
       .leave-pdf-checkbox{display:inline-flex;width:6.5mm;height:6.5mm;border:.5mm solid #111;align-items:center;justify-content:center;font-family:Arial,Helvetica,sans-serif;font-size:12pt;line-height:1;box-sizing:border-box}
       .leave-pdf-checkbox.checked{font-weight:900}
+      .leave-pdf-comment{margin-top:5mm;font-size:9.5pt;line-height:1.25}
+      .leave-pdf-comment strong{display:block;margin-bottom:1.5mm}
+      .leave-pdf-comment div{min-height:13mm;border-bottom:.35mm solid #222;white-space:pre-wrap;overflow-wrap:anywhere}
       .leave-pdf-accord-title{width:68mm;margin:12mm auto 4mm;text-align:center;border:1.1mm double #748b9b;padding:3mm 2mm;font-size:11.5pt;font-weight:700;box-sizing:border-box}
       .leave-pdf-decision-row{display:flex;justify-content:space-around;width:90mm;margin:0 auto 8mm;font-weight:700;font-size:11pt}
       .leave-pdf-decision.selected{color:#d40000;text-decoration:underline;text-decoration-thickness:.5mm;text-underline-offset:1.5mm}
