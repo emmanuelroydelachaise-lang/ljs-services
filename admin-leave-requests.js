@@ -88,6 +88,7 @@
         <div>
           <strong>${esc(displayName(request))}</strong>
           <div class="meta">${request.request_type === 'conge' ? 'Congé' : 'Absence'} · du ${esc(fmtDate(request.date_from))} au ${esc(fmtDate(request.date_to))} inclus · demandée le ${esc(fmtDate(request.request_date))}</div>
+          ${request.employee_comment ? `<div class="admin-leave-employee-comment"><strong>Commentaire :</strong> ${esc(request.employee_comment)}</div>` : ''}
         </div>
         <span class="leave-status leave-pending">EN ATTENTE</span>
       </div>
@@ -277,6 +278,7 @@
         <button class="secondary admin-leave-archive-delete" type="button">Supprimer</button>
       </div>
       <div class="admin-leave-archive-details-box hidden">
+        ${request.employee_comment ? `<div class="admin-leave-employee-comment"><strong>Commentaire du technicien :</strong> ${esc(request.employee_comment)}</div>` : ''}
         ${request.refusal_reason ? `<div class="admin-leave-refusal-reason"><strong>Motif du refus :</strong> ${esc(request.refusal_reason)}</div>` : ''}
         <div class="admin-leave-signatures">
           <div><span class="admin-leave-mini-label">Signature du technicien</span>${request.employee_signature ? `<img src="${request.employee_signature}" alt="Signature technicien">` : ''}</div>
