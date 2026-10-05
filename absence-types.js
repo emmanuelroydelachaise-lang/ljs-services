@@ -1,5 +1,5 @@
 (() => {
-  const ALLOWED_TYPES = new Set(['', 'absent', 'cp', 'arret']);
+  const ALLOWED_TYPES = new Set(['', 'absent', 'cp', 'arret', 'cfa']);
 
   function normalizedAbsenceType(day) {
     const raw = String(day?.absence_type || '').toLowerCase();
@@ -11,6 +11,7 @@
     const type = normalizedAbsenceType(day);
     if (type === 'cp') return 'CP';
     if (type === 'arret') return 'ARRÊT';
+    if (type === 'cfa') return 'CFA';
     return 'ABSENT';
   }
 
@@ -161,12 +162,14 @@
 
       const cpInput = addChoice(choices, 'cp-check', 'CP', type === 'cp', locked);
       const arretInput = addChoice(choices, 'arret-check', 'Arrêt', type === 'arret', locked);
+      const cfaInput = addChoice(choices, 'cfa-check', 'CFA', type === 'cfa', locked);
       const baseAbsentHandler = absentInput.onchange;
 
       function refreshChecks(selectedType) {
         absentInput.checked = selectedType === 'absent';
         cpInput.checked = selectedType === 'cp';
         arretInput.checked = selectedType === 'arret';
+        cfaInput.checked = selectedType === 'cfa';
       }
 
       function setType(selectedType) {
@@ -188,6 +191,7 @@
       absentInput.onchange = event => setType(event.target.checked ? 'absent' : '');
       cpInput.onchange = event => setType(event.target.checked ? 'cp' : '');
       arretInput.onchange = event => setType(event.target.checked ? 'arret' : '');
+      cfaInput.onchange = event => setType(event.target.checked ? 'cfa' : '');
       refreshChecks(type);
       return section;
     };
@@ -217,6 +221,7 @@
 
       const cpInput = addChoice(choices, 'admin-cp', 'CP', type === 'cp', absentInput.disabled);
       const arretInput = addChoice(choices, 'admin-arret', 'Arrêt', type === 'arret', absentInput.disabled);
+      const cfaInput = addChoice(choices, 'admin-cfa', 'CFA', type === 'cfa', absentInput.disabled);
 
       function setType(selectedType, source) {
         const nextType = ALLOWED_TYPES.has(selectedType) ? selectedType : '';
@@ -234,6 +239,7 @@
       absentInput.onchange = event => setType(event.target.checked ? 'absent' : '', event.target);
       cpInput.onchange = event => setType(event.target.checked ? 'cp' : '', event.target);
       arretInput.onchange = event => setType(event.target.checked ? 'arret' : '', event.target);
+      cfaInput.onchange = event => setType(event.target.checked ? 'cfa' : '', event.target);
       return section;
     };
 
@@ -294,7 +300,7 @@
               console.error(error);
               const box = document.getElementById('saveMsg');
               if (box) box.textContent = 'Erreur : impossible d’enregistrer le type d’absence.';
-              alert('Impossible d’enregistrer CP / Arrêt : ' + (error.message || error));
+              alert('Impossible d’enregistrer CP / Arrêt / CFA : ' + (error.message || error));
             }
           }
           return result;
@@ -319,7 +325,7 @@
             await persistAbsenceTypes(sheet);
           } catch (error) {
             console.error(error);
-            alert('Impossible d’enregistrer CP / Arrêt : ' + (error.message || error));
+            alert('Impossible d’enregistrer CP / Arrêt / CFA : ' + (error.message || error));
           }
         }
         return result;
