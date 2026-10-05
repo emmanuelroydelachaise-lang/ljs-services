@@ -1,5 +1,5 @@
 (() => {
-  const VERSION = '20260925-leave-comment-1';
+  const VERSION = '20261005-cfa-1';
   const CLEAN_KEY = 'ljs_services_pwa_clean_version';
   let deferredPrompt = null;
 
